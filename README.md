@@ -15,7 +15,6 @@ In WBM:
 3. Enable Docker.
 4. Enable and set a NTP time server.
 5. Format a memory card as 'ext4' with label 'Docker'.
-6. Copy the scripts to the controller '/home/admin' directory.
 
 Extend the docker data directory from internal flash to memory card:
 
