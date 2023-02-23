@@ -2,8 +2,6 @@
 
 ## !!! EXPERIMENTAL !!!
 
-## wagono-mid-tig-stack
-
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
 ## Manually setup of TIG stack
