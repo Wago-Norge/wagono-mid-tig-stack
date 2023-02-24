@@ -76,7 +76,7 @@ docker pull arm32v7/influxdb
 Make a volume for data:
 
 ```
-docker volume influx-vol-data
+docker volume create influx-vol-data
 ```
 
 Copy scripts to '/home/admin' and make them executable:
