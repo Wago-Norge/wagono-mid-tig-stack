@@ -4,6 +4,8 @@
 
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
 ## Manually setup of TIG stack
 
 ### Prepare the controller
@@ -74,7 +76,7 @@ Copy scripts to '/home/admin' and make them executable:
 chmod +x influxdb.conf && chmod +x influxdb-init.iql
 ```
 
-Create the container:&#x20;
+Create the container:
 
 ```
 docker create --name influx --restart unless-stopped -p 8086:8086 \
@@ -94,8 +96,6 @@ Get Influx Grafana from Dockerhub:
 ```
 docker pull grafana/grafana
 ```
-
-
 
 ### Run the stack
 
