@@ -6,6 +6,15 @@ Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
 <figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
+## 879-30xx Setup
+
+Default passwor is 0000.
+
+1. Download the Android app from store.
+2. Enter the MID menu and select bluetooth.
+3. Scan the QR-code.
+4. Go to settings and change modbus settings according to telegraf configuration.
+
 ## Manually setup of TIG stack
 
 ### Prepare the controller
