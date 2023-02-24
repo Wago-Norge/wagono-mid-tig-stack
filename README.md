@@ -73,10 +73,10 @@ Get Influx v1.8 from Dockerhub:
 docker pull arm32v7/influxdb
 ```
 
-Make a volume for data:
+Make a volume for data sources:
 
 ```
-docker volume create influx-vol-data
+docker volume create grafana-storage
 ```
 
 Copy scripts to '/home/admin' and make them executable:
@@ -106,12 +106,30 @@ Get Influx Grafana from Dockerhub:
 docker pull grafana/grafana
 ```
 
+Make a volume for data:
+
+```
+docker volume create grafana-vol-data
+```
+
+Create the container:
+
+```
+docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-storage:/var/lib/grafana grafana/grafana:latest
+```
+
+Default user is 'admin' and password 'wago123'.
+
+There is an API key for Websockets present.
+
+
+
+
+
 ### Run the stack
 
 ```
-// ...... not finnished
-
-docker start telegraf && docker start influx
+docker start telegraf && docker start influx && docker start grafana
 ```
 
 ## Automated setup of TIG stack
