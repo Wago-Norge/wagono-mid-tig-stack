@@ -73,7 +73,7 @@ Get Influx v1.8 from Dockerhub:
 docker pull arm32v7/influxdb
 ```
 
-Make a volume for data sources:
+Make a volume for data:
 
 ```
 docker volume create grafana-storage
@@ -120,9 +120,9 @@ docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-st
 
 Default user is 'admin' and password 'wago123'.
 
-There is an API key for Websockets present.
+There is an API key for Websockets live data present.
 
-
+## !!! NOT FINNISHED !!!
 
 
 
