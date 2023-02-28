@@ -76,7 +76,7 @@ docker pull arm32v7/influxdb
 Make a volume for data:
 
 ```
-docker volume create grafana-storage
+docker volume create influx-vol-data
 ```
 
 Copy scripts to '/home/admin' and make them executable:
