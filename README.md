@@ -118,7 +118,7 @@ docker volume create grafana-vol-data
 Create the container:
 
 ```
-docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-storage:/var/lib/grafana grafana/grafana:latest
+docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest
 ```
 
 Default user is 'admin' and password 'wago123'.
