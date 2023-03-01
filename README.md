@@ -1,6 +1,7 @@
 # README
 
 ## !!! EXPERIMENTAL !!!
+> Please read issuetracker. There is a case with Grafana.
 
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
