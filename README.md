@@ -1,11 +1,12 @@
 # README
 
 ## !!! EXPERIMENTAL !!!
+
 > Please read issuetracker. There is a case with Grafana.
 
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 ## 879-30xx Setup
 
@@ -28,20 +29,16 @@ In WBM:
 4. Enable and set a NTP time server.
 5. Format a memory card as 'ext4' with label 'Docker'.
 
-Extend the docker data directory from internal flash to memory card:
+Extend the docker data directory from internal flash to memory card. Change to “data-root”:“/media/docker”:
 
 ```
-// change to “data-root”:“/media/docker”
-nano /etc/docker/deamon.json 
+nano /etc/docker/daemon.json 
 ```
 
 Permit docker to access serial port:
 
 ```
-// For Edge controller
-sudo chmod ugo+rw /dev/ttymxc1
-// For CC100
-abc
+sudo chmod ugo+rw /dev/serial
 ```
 
 Reboot the controller.
@@ -63,7 +60,7 @@ chmod +x telegraf.conf
 Create the container:
 
 ```
-docker create --name telegraf --restart unless-stopped --device=/dev/ttymxc1:/dev/ttymxc1:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest
+docker create --name telegraf --restart unless-stopped --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest
 ```
 
 ### Setup Influx
@@ -112,7 +109,6 @@ docker pull grafana/grafana
 Make a volume for data:
 
 ```
-// Ta vekk...
 docker volume create grafana-vol-data
 ```
 
@@ -125,10 +121,6 @@ docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-vo
 Default user is 'admin' and password 'wago123'.
 
 There is an API key for Websockets live data present.
-
-## !!! NOT FINNISHED !!!
-
-
 
 ### Run the stack
 
