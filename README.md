@@ -128,6 +128,12 @@ There is an API key for Websockets live data present.
 docker start telegraf && docker start influx && docker start grafana
 ```
 
+### Configure Influx and Grafana
+
+Add datasource Influxdb, set correct IP:PORT and enable basic authentication. Provide the user and password from the container configuration above.
+
+Import the Grafana dashboards.
+
 ## Automated setup of TIG stack
 
 TBA: med docker compose, script->REST-API WBM?
