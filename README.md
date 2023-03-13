@@ -134,4 +134,4 @@ Import the Grafana dashboards.
 
 ## Automated setup of TIG stack
 
-TBA: med docker compose, script->REST-API WBM?
+TBA.
