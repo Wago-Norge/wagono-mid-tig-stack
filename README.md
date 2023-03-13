@@ -2,7 +2,7 @@
 
 ## !!! EXPERIMENTAL !!!
 
-> Please read issuetracker. There is a case with Grafana.
+> Please read issuetracker. 
 
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
@@ -103,8 +103,6 @@ Get Influx Grafana from Dockerhub:
 ```
 docker pull grafana/grafana
 ```
-
-!!! KANSKJE MAPPE PATH TIL HOST I STEDET, DA BACKUP AV VOLUME ER "KRØKKETE" UTEN DOCKER DESKTOP !!! EV. KONFIG FIL MED OPPSETT. !!!
 
 Make a volume for data:
 
