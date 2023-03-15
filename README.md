@@ -2,7 +2,7 @@
 
 ## !!! EXPERIMENTAL !!!
 
-> Please read issuetracker. 
+> Please read issuetracker.
 
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
@@ -60,7 +60,7 @@ chmod +x telegraf.conf
 Create the container:
 
 ```
-docker create --name telegraf --restart unless-stopped --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest
+docker create --name telegraf --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest
 ```
 
 ### Setup Influx
@@ -86,7 +86,7 @@ chmod +x influxdb.conf && chmod +x influxdb-init.iql
 Create the container:
 
 ```
-docker create --name influx --restart unless-stopped -p 8086:8086 \
+docker create --name influx -p 8086:8086 \
         -e INFLUXDB_ADMIN_USER=admin \
         -e INFLUXDB_ADMIN_PASSWORD=wago \
         -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE \
@@ -113,17 +113,27 @@ docker volume create grafana-vol-data
 Create the container:
 
 ```
-docker create --name grafana --restart unless-stopped -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest
+docker create --name grafana -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest
 ```
 
 Default user is 'admin' and password 'wago123'.
 
 There is an API key for Websockets live data present.
 
-### Run the stack
+### Setup start conditions
+
+Copy the provided script to '/etc/init.d'. Then make a symlink to this script in /'etc/init.d':
 
 ```
-docker start telegraf && docker start influx && docker start grafana
+ln -s /etc/init.d/docker-tic-stack /etc/rc.d/S99_zz_docker_tic_Stack
+```
+
+### Run the stack
+
+Repower the controller or execute 'reboot' command:
+
+```
+reboot
 ```
 
 ### Configure Influx and Grafana
