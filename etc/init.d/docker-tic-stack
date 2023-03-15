@@ -1,0 +1,6 @@
+sudo chmod ugo+rw /dev/serial
+docker start influx
+sleep 10
+docker start grafana
+sleep 60
+docker start telegraf
