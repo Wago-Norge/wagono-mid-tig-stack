@@ -122,7 +122,13 @@ There is an API key for Websockets live data present.
 
 ### Setup start conditions
 
-Copy the provided script to '/etc/init.d'. Then make a symlink to this script in /'etc/init.d':
+Copy the provided script to '/etc/init.d' and make it executable:
+
+```
+chmod +x /etc/init.d/docker-tic-stack
+```
+
+Then make a symlink to this script in /'etc/init.d':
 
 ```
 ln -s /etc/init.d/docker-tic-stack /etc/rc.d/S99_zz_docker_tic_Stack
