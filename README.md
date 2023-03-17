@@ -13,6 +13,8 @@ Default password is 0000.
 3. Scan the QR-code.
 4. Go to settings and change modbus settings according to telegraf configuration.
 
+Meter is using RS-485: Modbus® address 001 • Baud rate 9600 • 8 data bits • Parity: Even • 1 stop bit.
+
 ## Manually setup of TIG stack
 
 ### Prepare the controller
