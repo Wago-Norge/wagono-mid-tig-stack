@@ -50,7 +50,7 @@ docker pull arm32v7/telegraf
 Copy the script to '/home/admin' and make them executable:
 
 ```
-chmod +x telegraf.conf
+chmod +x /home/admin/telegraf.conf
 ```
 
 Create the container:
@@ -76,7 +76,7 @@ docker volume create influx-vol-data
 Copy scripts to '/home/admin' and make them executable:
 
 ```
-chmod +x influxdb.conf && chmod +x influxdb-init.iql
+chmod +x /home/admin/influxdb.conf && chmod +x /home/admin/influxdb-init.iql
 ```
 
 Create the container:
