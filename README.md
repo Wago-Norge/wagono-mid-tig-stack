@@ -15,6 +15,20 @@ Default password is 0000.
 
 Meter is using RS-485: Modbus® address 001 • Baud rate 9600 • 8 data bits • Parity: Even • 1 stop bit.
 
+### Wiring
+
+CC100:
+
+D+ -> MID A&#x20;
+
+D- -> MID B/-
+
+PFC200:
+
+Pin 3 -> MID  B/-
+
+Pin 8 -> MID A
+
 ## Manually setup of TIG stack
 
 ### Prepare the controller
