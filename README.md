@@ -17,17 +17,9 @@ Meter is using RS-485: Modbus® address 001 • Baud rate 9600 • 8 data bits �
 
 ### Wiring
 
-CC100:
+CC100: D+ -> A, D- > B/-
 
-D+ -> MID A&#x20;
-
-D- -> MID B/-
-
-PFC200:
-
-Pin 3 -> MID  B/-
-
-Pin 8 -> MID A
+PFC200: Pin 3 -> B/-, Pin 8 -> A
 
 ## Manually setup of TIG stack
 
