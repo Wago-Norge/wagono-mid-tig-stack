@@ -1,9 +1,5 @@
 # README
 
-## !!! EXPERIMENTAL !!!
-
-> Please read issuetracker.
-
 Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
 
 <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
