@@ -144,6 +144,4 @@ Add datasource Influxdb, set correct IP:PORT and enable basic authentication. Pr
 
 Import the Grafana dashboards.
 
-## Automated setup of TIG stack
-
-TBA.
+##
