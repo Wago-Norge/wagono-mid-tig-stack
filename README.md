@@ -138,9 +138,24 @@ Repower the controller or execute 'reboot' command:
 reboot
 ```
 
-### Configure Influx and Grafana
+### Configure Grafana
 
-Add datasource Influxdb, set correct IP:PORT and enable basic authentication. Provide the user and password from the container configuration above.
+Quickly get started with datasource for Influxdb:
+
+1. Settings ->Add datasource -> InfluxDB
+2. URL: [http://IPADDRESS:8086](http://10.0.0.228:8086)
+3. Database: wagodb
+4. User: admin
+5. Password: wago123
+
+Add token for Telegraf websocket data:
+
+1. Settings -> API keys -> New API Key
+2. Key Name: telegraf
+3. Role: Admin
+4. Time To Live: 1y
+
+
 
 Import the Grafana dashboards.
 
