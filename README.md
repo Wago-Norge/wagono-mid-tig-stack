@@ -32,7 +32,7 @@ ssh root@<ip-address>
 Download the init script:
 
 ```
-wget wget -O init.sh https://raw.githubusercontent.com/Wago-Norge/wagono-mid-tig-stack/main/init.sh --no-check-certificate
+wget -O init.sh https://raw.githubusercontent.com/Wago-Norge/wagono-mid-tig-stack/main/init.sh --no-check-certificate
 ```
 
 Make the script executable:
