@@ -13,7 +13,7 @@ mv influxdb-init.iql /home/admin
 mv influxdb.conf /home/admin
 mv telegraf.conf /home/admin
 
-
+./onboarding.sh
 
 
 
