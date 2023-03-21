@@ -1,0 +1,1 @@
+echo test onboarding ok
