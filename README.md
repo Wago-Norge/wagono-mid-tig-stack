@@ -21,7 +21,33 @@ CC100: D+ -> A, D- > B/-
 
 PFC200: Pin 3 -> B/-, Pin 8 -> A
 
-## Manually setup of TIG stack
+## Automated setup
+
+Log in to the controller as root-user and provide the password:
+
+```
+ssh root@<ip-address>
+```
+
+Download the init script:
+
+```
+wget wget -O init.sh https://raw.githubusercontent.com/Wago-Norge/wagono-mid-tig-stack/main/init.sh --no-check-certificate
+```
+
+Make the script executable:
+
+```
+chmod +x init.sh
+```
+
+Run the installation:
+
+```
+./init.sh
+```
+
+## Manual setup
 
 ### Prepare the controller
 
