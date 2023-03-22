@@ -12,11 +12,23 @@ remove_container () {
 }
 
 run_telegraf () {
-    local local_run=$(docker run -d --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
+    # We only create!
+    local local_run=$(docker create --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
     echo "$local_run"
+
+    # Ask for changing IP
+    # ask for changing token to Grafana
+
+  
+    #read -p "Enter IP address: " ip
+    
+    
+    
 }
+
+
 
 run_influx () {
     local local_run=$(docker run -d --name "$1" -p 8086:8086 -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=wago -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE -v influx-vol-data:/var/lib/influxdb -v /home/admin/influxdb.conf:/etc/influxdb/influxdb.conf -v /home/admin/influxdb-init.iql:/docker-entrypoint-initdb.d/influxdb-init.iql arm32v7/influxdb:latest -config /etc/influxdb/influxdb.conf)
@@ -143,7 +155,6 @@ check_containers () {
         is_grafana="false"
     fi
 
-
     if [ $is_telegraf == "true" ] && [ $is_influx == "true" ] && [ $is_grafana == "true" ]; then
         echo "Onboarding status: Found container Telegraf, Influx and Grafana" >> midlog.txt
         onboard="TIG"
@@ -260,30 +271,7 @@ case "$onboard" in
 
                 [yY] ) echo "Onboarding status: Please wait.."
 
-                    # TELEGRAF
-
-                    # Install image - do not reinstall any excisting images
-                    image=$(check_image "telegraf")
-                    if [ "$image" = "false" ]; then
-                        ret="$(install_image "arm32v7/telegraf:latest")"
-                        echo "Onboarding status: Docker image for "$ret" pulled"
-                    else
-                        return_container_stat="$(inspect "telegraf")"
-                        # If running, stop it
-                        if [ "$return_container_stat" = "running" ]; then
-                            ret="$(docker stop telegraf)"
-                            echo "Onboarding status: Telegraf container stopped" >> midlog.txt
-                            wait
-                        fi
-
-                        # Remove container
-                        ret=$(remove_container "telegraf")
-                        echo "Onboarding status: "$ret" container removed"
-                    fi
-
-                    # Run container (function returns container id)
-                    ret="$(run_telegraf "telegraf")"
-                    echo "Onboarding status: Telegraf container started"   
+                    
 
                     # INFLUX
 
@@ -336,6 +324,35 @@ case "$onboard" in
                     # Run container (function returns container id)
                     ret="$(run_grafana "grafana")"
                     echo "Onboarding status: Grafana container started"   
+
+
+                    # TELEGRAF - start last because influx/telegraf connections
+
+                    # wait 30
+
+                    # Install image - do not reinstall any excisting images
+                    image=$(check_image "telegraf")
+                    if [ "$image" = "false" ]; then
+                        ret="$(install_image "arm32v7/telegraf:latest")"
+                        echo "Onboarding status: Docker image for "$ret" pulled"
+                    else
+                        return_container_stat="$(inspect "telegraf")"
+                        # If running, stop it
+                        if [ "$return_container_stat" = "running" ]; then
+                            ret="$(docker stop telegraf)"
+                            echo "Onboarding status: Telegraf container stopped" >> midlog.txt
+                            wait
+                        fi
+
+                        # Remove container
+                        ret=$(remove_container "telegraf")
+                        echo "Onboarding status: "$ret" container removed"
+                    fi
+
+                    # run container (function returns container id) 
+                    ret="$(run_telegraf "telegraf")"
+                    echo "Onboarding status: Telegraf container started"   
+
 
                     exit;;
 
