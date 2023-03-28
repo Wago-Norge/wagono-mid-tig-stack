@@ -268,15 +268,15 @@ mid_conf () {
     echo "Onboarding status: Requested amount of mids from user: $user_amount" >> midlog.txt
 
     # Amount of excisting requests
-    local modbus=$(grep -ow "inputs.modbus.request" target.conf | wc -l)
+    local modbus=$(grep -ow "inputs.modbus.request" telegraf.conf | wc -l)
 
     if [ $modbus = 1 ]; then
     
-        local field_start=$(awk '/fields/ {print FNR}' target.conf)
+        local field_start=$(awk '/fields/ {print FNR}' telegraf.conf)
         local field_start=$((field_start + 1))
         local line_start=$(awk '/inputs.modbus.request/ {print FNR}' target.conf)
         local line_start=$(($line_start -1))
-        local amount=$(awk "NR >= $line_start" target.conf | awk '/address/ {print NR":"}' | awk 'END { print NR }')
+        local amount=$(awk "NR >= $line_start" telegraf.conf | awk '/address/ {print NR":"}' | awk 'END { print NR }')
         local fields_end=$(( $field_start + $amount ))
         local lenght=$(( fields_end - line_start ))
 
@@ -290,7 +290,7 @@ mid_conf () {
 
         for j in $(eval echo "{1..20}")
         do
-            sed -i -e "${space_pos}a$space_line" target.conf
+            sed -i -e "${space_pos}a$space_line" telegraf.conf
             space_pos=$(( $fields_end + $j ))
         done
 
@@ -302,7 +302,7 @@ mid_conf () {
             for i in $(eval echo "{1..$lenght}")
             do
                 count_old=$(( $line_start + $i))
-                request=$(awk "NR >= $count_old && NR <= $count_old" target.conf)
+                request=$(awk "NR >= $count_old && NR <= $count_old" telegraf.conf)
 
                 if [[ "$request" == *"slave_id"* ]]; then
                     old_mb_Addr=$(echo "$request" | grep "slave_id" | awk {'print $3'})
@@ -312,7 +312,7 @@ mid_conf () {
                     request=$modified_line
                 fi
 
-                sed -i -e "${count_new}a$request" target.conf
+                sed -i -e "${count_new}a$request" telegraf.conf
                 count_new=$(($new_request_start + $i))
 
             done
