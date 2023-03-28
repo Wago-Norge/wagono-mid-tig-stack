@@ -41,11 +41,12 @@ Make the script executable:
 chmod +x init.sh
 ```
 
-Run the installation:
+Run the installation script and pass the amount of MIDs to be configured. Example 10:
 
 ```
-./init.sh
+./init.sh 10
 ```
+> Max 10 is supported
 
 ## Manual setup
 
