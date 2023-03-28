@@ -13,7 +13,8 @@ mv influxdb-init.iql /home/admin
 mv influxdb.conf /home/admin
 mv telegraf.conf /home/admin
 
-./onboarding.sh
+cnt=$1
+./onboarding.sh $cnt
 
 
 
