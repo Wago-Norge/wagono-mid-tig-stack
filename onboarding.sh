@@ -325,8 +325,10 @@ mid_conf () {
 
 
 
-# Remaining: add token bearer for Grafana..
-# "Bearer eyJrIjoiZHAwc2w3VHV6UGFCWFpRVjVuZTRkcWJwZXZUV3o2engiLCJuIjoidGVsZWdyYWYiLCJpZCI6MX0=""
+# Remaining: 
+# 1. add token bearer for Grafana..
+#    "Bearer eyJrIjoiZHAwc2w3VHV6UGFCWFpRVjVuZTRkcWJwZXZUV3o2engiLCJuIjoidGVsZWdyYWYiLCJpZCI6MX0=""
+# 2. add support for edge pc
 #
 # ISSUES:
 # Must wait to start telegraf until token is ok.. not fixed
