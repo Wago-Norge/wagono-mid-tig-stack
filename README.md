@@ -58,7 +58,7 @@ In case of any problems run:
 ./onboard --help
 ```
 
-Configure Influxdb in Grafana as described in the manual setup beneath.
+Configure Influxdb in Grafana as described below in the "manual setup".
 
 ## Manual setup
 
