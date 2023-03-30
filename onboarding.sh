@@ -488,7 +488,7 @@ case "$onboard" in
 
         case $yn in 
 
-            [yY] ) echo "Onboarding status: Please wait.." 
+            [yY] ) echo "Onboarding status: Please wait.. keep calm, this could take several minutes" 
 
                 # GRAFANA (start Grafana first- issuetracker)
                 image=$(check_image "grafana")
@@ -527,7 +527,6 @@ case "$onboard" in
                     # Install image
                     image=$(check_image "influx")
                     if [ "$image" = "false" ]; then
-                        echo "DEBUG 2" >> midlog.txt  > /dev/stderr
                         ret="$(install_image "arm32v7/influxdb:latest")"
                         echo "Onboarding status: Docker image for "$ret" pulled"
                         ret="$(create_volume "influx-vol-data")"
