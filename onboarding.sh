@@ -14,7 +14,6 @@ remove_container () {
 run_telegraf () {
     ret="$(change_ip)"
     wait
-    # We only create!
     local local_run=$(docker run -d --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
