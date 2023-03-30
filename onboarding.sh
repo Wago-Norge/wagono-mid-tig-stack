@@ -1,6 +1,6 @@
 
 # This setup script is experimental.
-
+version=0.0.99
 
 ### FUNCTIONS ####
 
@@ -90,6 +90,7 @@ create_volume () {
 }
 
 inspect () {
+
     local container=$(docker ps -a | grep $1)
     if [ "$container" != "" ]; then
         local container_Status=$(docker container inspect -f '{{.State.Status}}' "$1")
@@ -111,15 +112,19 @@ inspect () {
                 local stat_con="$container_Status"
                 ;;
             * ) 
+                "Onboarding status: "$1" container has status unknown status (is it removed?)" >> midlog.txt
+                local stat_con="unknown"
                 ;;
         esac
     else
-        local stat_con="Onboarding status: "$1" not found.." >> midlog.txt
+        echo "Onboarding status: "$1" container not found.." >> midlog.txt
+        local stat_con="unknown"
     fi
     echo "$stat_con"
 }
 
 check_containers () {
+
     # Telegraf
     local is_telegraf=$(docker ps -a | grep "$1")
     if [ "$is_telegraf" != "" ]; then
@@ -309,7 +314,7 @@ mid_conf () {
                     echo "Onboarding status: Modbus address field modified from $old_mb_Addr to $new_mb_addr"  >> midlog.txt
                     request=$modified_line
                 fi
-
+               
                 sed -i -e "${count_new}a$request" telegraf.conf
                 count_new=$(($new_request_start + $i))
 
@@ -330,14 +335,17 @@ configure_grafana () {
     local org=$4
 
     local cnt_wait="1"
-
-    while [ "$logs" == "" ] && [ "$cnt_wait" -le "5" ]; do
+    local server_listen="";
+ 
+    while [ "$server_listen" == "" ] && [ "$cnt_wait" -le "10" ]; do
         echo "Onboarding status: Waiting for Grafana to start.." >> midlog.txt
         local logs="$(docker logs grafana --tail 10)"
-        local server_listen=$(echo $logs | grep "HTTP Server Listen")
-        sleep 5
+        echo "Onboarding status: Grafana logs: $logs"  >> midlog.txt
+        server_listen=$(echo $logs | grep "HTTP Server Listen")
+        echo "Onboarding status: Reading logs for "HTTP Server Listen": $server_listen"  >> midlog.txt
+        cnt_wait=$((cnt_wait+1))
+        sleep 10
     done
-
     sleep 5
     echo "Onboarding status: Grafana up!" >> midlog.txt
 
@@ -347,40 +355,51 @@ configure_grafana () {
     wait
     echo "Onboarding status: Grafana: result: $res"  >> midlog.txt
 
-    local id=$(echo "$res" | grep "Organization created" | awk {'print $2'} | cut -c 18-19)
-    wait
-    local cnt=$(echo ${#id})
+    if [ "$res" != "" ]; then
 
-    if [ "$cnt" > "1" ]; then
-        local temp=$(echo "$id" | grep "}")
-        if [ "$temp" != "" ]; then  
-            id=$(echo "$res" | grep "Organization created" | awk {'print $2'} | cut -c 18-18)
-        fi
-    fi
-
-    if [ "$id" != "" ]; then
-        echo "Onboarding status: Grafana: Organization $org created with id $id"  >> midlog.txt
-        echo "Onboarding status: Grafana: Switching organization.."  >> midlog.txt
-
-        res=$(curl -X POST http://$user:$password@$ip:3000/api/user/using/$id)
+        local id=$(echo "$res" | grep "Organization created" | awk {'print $2'} | cut -c 18-19)
         wait
-        echo "Onboarding status: Grafana: result: $res"  >> midlog.txt
-        temp=$(echo "$res" | grep "Active organization changed" | cut -c 13-39) 
+        local cnt=$(echo ${#id})
 
-        if [[ "$temp" == "Active organization changed" ]]; then
-            echo "Onboarding status: Grafana: Organization $org changed successfully"  >> midlog.txt
-            echo "Onboarding status: Grafana: reading token.."  >> midlog.txt
+        if [ "$cnt" > "1" ]; then
+            local temp=$(echo "$id" | grep "}")
+            if [ "$temp" != "" ]; then  
+                id=$(echo "$res" | grep "Organization created" | awk {'print $2'} | cut -c 18-18)
+            fi
+        fi
 
-            res=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"apikeycurl", "role": "Admin"}' http://$user:$password@$ip:3000/api/auth/keys)
+        if [ "$id" != "" ]; then
+            echo "Onboarding status: Grafana: Organization $org created with id $id"  >> midlog.txt
+            echo "Onboarding status: Grafana: Switching organization.."  >> midlog.txt
+
+            res=$(curl -X POST http://$user:$password@$ip:3000/api/user/using/$id)
             wait
             echo "Onboarding status: Grafana: result: $res"  >> midlog.txt
-            temp=$(echo "$res" | grep "apikeycurl" | cut -c 36-150)
-            cnt=$(echo ${#temp})
-            token=$(echo $temp| cut -c 1-$((cnt-1)))
-            echo "Onboarding status: Grafana: token: $token"  >> midlog.txt
+            temp=$(echo "$res" | grep "Active organization changed" | cut -c 13-39) 
 
-            echo "grafana configured"
+            if [[ "$temp" == "Active organization changed" ]]; then
+                echo "Onboarding status: Grafana: Organization $org changed successfully"  >> midlog.txt
+                echo "Onboarding status: Grafana: reading token.."  >> midlog.txt
+
+                res=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"apikeycurl", "role": "Admin"}' http://$user:$password@$ip:3000/api/auth/keys)
+                wait
+                echo "Onboarding status: Grafana: result: $res"  >> midlog.txt
+                temp=$(echo "$res" | grep "apikeycurl" | cut -c 36-150)
+                cnt=$(echo ${#temp})
+                local token=$(echo $temp| cut -c 1-$((cnt-1)))
+                echo "Onboarding status: Grafana: token is: $token"  >> midlog.txt
+
+                local old=$(grep "Bearer" telegraf.conf | awk {'print $4'})
+                echo "Onboarding status: Changing grafana token in telegraf.conf from $old to $token"  >> midlog.txt
+                #sed -i 's|'"$old"'|'"$token"'"''|g' telegraf.conf
+                sed -i 's|'"$old"'|'"$token"'|g' telegraf.conf
+
+                echo "grafana configured"
+            fi
         fi
+    else
+       echo "Onboarding status: Can't connect to Grafana. Onboarding is cancelled. See log for more information."  > /dev/stderr
+       echo "Onboarding status: No connection to Grafana? result is: $res" >> midlog.txt 
     fi
 }
 
@@ -401,24 +420,43 @@ wait
 echo "Logging to file /home/admin/midlog.txt" > midlog.txt > /dev/stderr
 
 # Force removal of containers and volumes, keep images.
-if [ "$1" = "--force" ]; then
-    echo "Onboarding status: Forced removal of MID TIG stack" > midlog.txt > /dev/stderr
+if [ "$1" = "--clean" ]; then
+    echo "Onboarding status: Forced removal of MID TIG stack" >> midlog.txt > /dev/stderr
+    echo "Onboarding status: Stopping containers" >> midlog.txt > /dev/stderr 
     docker stop $(docker ps -a -q)
     wait
+    echo "Onboarding status: Removing containers" >> midlog.txt > /dev/stderr
     docker rm $(docker ps -a -q)
     wait
     #docker rmi $(docker images -a -q)
     #wait
+    echo "Onboarding status: Removing grafana-vol-data" >> midlog.txt > /dev/stderr    
     docker volume rm grafana-vol-data
     wait
+    echo "Onboarding status: Removing influx-vol-data" >> midlog.txt > /dev/stderr
     docker volume rm influx-vol-data
     wait
     # retrieve original file
     ret="$(cp telegraf_copy.conf telegraf.conf)"
     wait
+    echo "*****************************************************"
+    echo "Onboarding status: Cleaning finnished" >> midlog.txt > /dev/stderr
+    echo "Onboarding status: Run ./onboard -help for information" > /dev/stderr  
+    echo "******************************************************"
+elif [ "$1" = "-help" ] ||  [ "$1" = "-h" ]; then
+    echo " "
+    echo "  Version: $version"
+    echo "  Usage: onboarding [options]"
+    echo "  "
+    echo "  [options]":
+    echo "      number: amount of MID meeters 1-10"
+    echo "      --clean: stop and remove containers and volumes. Keep images."
+    echo "  "
 else 
     if [ "$1" = "1" ]; then
         echo "Onboarding status: Selected amount of mids allready configured in Telegraf.conf" >> midlog.txt
+        chmod ugo+rw /dev/serial
+        onboard="$(check_containers "telegraf" "influx" "grafana")" 
     else 
         if  [ "$1" -gt "0" ] && [ "$1" -le "10" ]; then
             # save original
@@ -445,18 +483,51 @@ case "$onboard" in
 
         echo "Onboarding status: No MID TIG stack found" >> midlog.txt > /dev/stderr
         
-            while true; do
-            read -p "Do you want install? (y/n) " yn
+    while true; do
+    read -p "Do you want install? (y/n) " yn
 
-            case $yn in 
+        case $yn in 
 
-                [yY] ) echo "Onboarding status: Please wait.."
+            [yY] ) echo "Onboarding status: Please wait.." 
+
+                # GRAFANA (start Grafana first- issuetracker)
+                image=$(check_image "grafana")
+                if [ "$image" = "false" ]; then
+                    ret="$(install_image "grafana/grafana:latest")"
+                    echo "Onboarding status: Docker image for "$ret" pulled"
+                    ret="$(create_volume "grafana-vol-data")"
+                else
+                    return_container_stat="$(inspect "grafana")"
+
+                    if [ "$return_container_stat" = "running" ]; then
+                        ret="$(docker stop grafana)"
+                        echo "Onboarding status: Grafana container stopped" >> midlog.txt
+                        wait
+                    fi
+                    if [ "$return_container_stat" = "unknown" ]; then
+                        echo "Onboarding status: Remove Grafana could not be executed.." >> midlog.txt
+                    else
+                        ret=$(remove_container "Grafana")
+                        echo "Onboarding status: "$ret" container removed"
+                    fi
+                fi
+
+                ret="$(create_volume "grafana-vol-data")"
+
+                ret="$(run_grafana "grafana")"
+                echo "Onboarding status: Grafana container started"   
+
+                ip_addr=$(ip route get 8.8.8.8 | awk '{ print $7; exit }')
+                ret="$(configure_grafana "$ip_addr" "admin" "admin" "wago")"
+
+                if [ "$ret" = "grafana configured" ]; then
 
                     # INFLUX
 
                     # Install image
                     image=$(check_image "influx")
                     if [ "$image" = "false" ]; then
+                        echo "DEBUG 2" >> midlog.txt  > /dev/stderr
                         ret="$(install_image "arm32v7/influxdb:latest")"
                         echo "Onboarding status: Docker image for "$ret" pulled"
                         ret="$(create_volume "influx-vol-data")"
@@ -468,10 +539,13 @@ case "$onboard" in
                             echo "Onboarding status: Influx container stopped" >> midlog.txt
                             wait
                         fi
-
-                        # Remove container
-                        ret=$(remove_container "influx")
-                        echo "Onboarding status: "$ret" container removed"
+                        # Remove container 
+                        if [ "$return_container_stat" = "unknown" ]; then
+                            echo "Onboarding status: Remove Influx could not be executed.." >> midlog.txt
+                        else
+                            ret=$(remove_container "influx")
+                            echo "Onboarding status: "$ret" container removed"
+                        fi
                     fi
                     
                     ret="$(create_volume "influx-vol-data")"
@@ -479,67 +553,42 @@ case "$onboard" in
                     ret="$(run_influx "influx")"
                     echo "Onboarding status: Influx container started"   
 
-                    # GRAFANA
-                    image=$(check_image "grafana")
+
+                    # TELEGRAF
+                    image=$(check_image "telegraf")
                     if [ "$image" = "false" ]; then
-                        ret="$(install_image "grafana/grafana:latest")"
+                        ret="$(install_image "arm32v7/telegraf:latest")"
                         echo "Onboarding status: Docker image for "$ret" pulled"
-                        ret="$(create_volume "grafana-vol-data")"
                     else
-                        return_container_stat="$(inspect "grafana")"
+                        return_container_stat="$(inspect "telegraf")"
 
                         if [ "$return_container_stat" = "running" ]; then
-                            ret="$(docker stop grafana)"
-                            echo "Onboarding status: Grafana container stopped" >> midlog.txt
+                            ret="$(docker stop telegraf)"
+                            echo "Onboarding status: Telegraf container stopped" >> midlog.txt
                             wait
                         fi
-
-                        ret=$(remove_container "Grafana")
-                        echo "Onboarding status: "$ret" container removed"
-                    fi
-
-                    ret="$(create_volume "grafana-vol-data")"
-
-                    ret="$(run_grafana "grafana")"
-                    echo "Onboarding status: Grafana container started"   
-
-                    ip_addr=$(ip route get 8.8.8.8 | awk '{ print $7; exit }')
-                    ret="$(configure_grafana "$ip_addr" "admin" "admin" "wago")"
-
-                    if [ "$ret" = "grafana configured" ]; then
-
-                        # TELEGRAF
-                        image=$(check_image "telegraf")
-                        if [ "$image" = "false" ]; then
-                            ret="$(install_image "arm32v7/telegraf:latest")"
-                            echo "Onboarding status: Docker image for "$ret" pulled"
+                        if [ "$return_container_stat" = "unknown" ]; then
+                            echo "Onboarding status: Remove Telegraf could not be executed.." >> midlog.txt
                         else
-                            return_container_stat="$(inspect "telegraf")"
-
-                            if [ "$return_container_stat" = "running" ]; then
-                                ret="$(docker stop telegraf)"
-                                echo "Onboarding status: Telegraf container stopped" >> midlog.txt
-                                wait
-                            fi
-
                             ret=$(remove_container "telegraf")
                             echo "Onboarding status: "$ret" container removed"
                         fi
-                        ret="$(run_telegraf "telegraf")"
-                        echo "Onboarding status: Telegraf container started"   
                     fi
+                    ret="$(run_telegraf "telegraf")"
+                    echo "Onboarding status: Telegraf container started"    
+                fi     
 
-                    exit;;
+                exit;;
 
-                # No - exit the case
-                [nN] ) echo exiting..;
-                    exit;;
-                
-                # Else
-                * ) echo invalid response;;
-            esac
-        done
-        ;;       
+            # No - exit the case
+            [nN] ) echo "exiting.." 
+                exit;;
+            
+            # Else
+            * ) echo invalid response;;
+        esac
+    done
+            ;; 
     
 
     "?I?") # Install Telegraf + Grafana
@@ -573,4 +622,5 @@ case "$onboard" in
 esac
 
 echo "Onboarding status: Finnished" >> midlog.txt > /dev/stderr
+
 
