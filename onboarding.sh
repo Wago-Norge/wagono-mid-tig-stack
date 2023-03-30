@@ -1,6 +1,6 @@
 
 # This setup script is experimental.
-version=0.0.99
+version="1.0.0"
 
 ### FUNCTIONS ####
 
