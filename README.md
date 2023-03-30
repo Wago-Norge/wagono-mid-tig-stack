@@ -23,6 +23,8 @@ PFC200: Pin 3 -> B/-, Pin 8 -> A
 
 ## Automated setup
 
+To install the TIG stack we provide a script.
+
 Log in to the controller as root-user and provide the password:
 
 ```
@@ -49,11 +51,13 @@ Run the installation script and pass the amount of MIDs to be configured. Exampl
 
 > Max 10 is supported
 
-The installed script onboarding.sh can be runned manually in case of problems:
+In case of any problems run:
 
 ```
 ./onboard --help
 ```
+
+Configure Influxdb in Grafana as described in the manual setup beneath.
 
 ## Manual setup
 
