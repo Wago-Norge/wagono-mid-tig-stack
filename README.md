@@ -46,7 +46,14 @@ Run the installation script and pass the amount of MIDs to be configured. Exampl
 ```
 ./init.sh 10
 ```
+
 > Max 10 is supported
+
+The installed script onboarding.sh can be runned manually in case of problems:
+
+```
+./onboard --help
+```
 
 ## Manual setup
 
@@ -189,8 +196,6 @@ Add token for Telegraf websocket data:
 2. Key Name: telegraf
 3. Role: Admin
 4. Time To Live: 1y
-
-
 
 Import the Grafana dashboards.
 
