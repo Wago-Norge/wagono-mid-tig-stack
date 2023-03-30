@@ -411,7 +411,7 @@ configure_grafana () {
 
 
 # Remaining: 
-# Add startup scripts to init.d / rc.d
+# add edge pc
 
 # save original
 ret="$(cp telegraf.conf telegraf_copy.conf)"
