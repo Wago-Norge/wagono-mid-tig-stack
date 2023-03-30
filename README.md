@@ -55,7 +55,7 @@ Run the installation script and pass the amount of MIDs to be configured:
 In case of any problems run:
 
 ```
-./onboard --help
+./onboarding --help
 ```
 
 Configure Influxdb in Grafana as described below in the "manual setup".
