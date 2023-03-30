@@ -11,12 +11,15 @@ chmod +x influxdb.conf
 chmod +x telegraf.conf
 chmod +x docker-tic-stack
 
+mv onboarding.sh /home/admin
 mv influxdb-init.iql /home/admin
 mv influxdb.conf /home/admin
 mv telegraf.conf /home/admin
 mv docker-tic-stack /etc/init.d
 
 ln -s /etc/init.d/docker-tic-stack /etc/rc.d/S99_zz_docker_tic_Stack
+
+cd /home/admin
 
 cnt=$1
 ./onboarding.sh $cnt
