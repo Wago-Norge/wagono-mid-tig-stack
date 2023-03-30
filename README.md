@@ -43,13 +43,13 @@ Make the script executable:
 chmod +x init.sh
 ```
 
-Run the installation script and pass the amount of MIDs to be configured. Example 10:
+Run the installation script and pass the amount of MIDs to be configured:
 
 ```
-./init.sh 10
+./init.sh <x>
 ```
 
-> Max 10 is supported
+> <x> is restricted to maximum 10 MID meeters  -> ./init.sh 10
 
 In case of any problems run:
 
