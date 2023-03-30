@@ -49,7 +49,7 @@ Run the installation script and pass the amount of MIDs to be configured:
 ./init.sh <x>
 ```
 
-> <x> is restricted to maximum 10 MID meeters  -> ./init.sh 10  
+> x is restricted to maximum 10 MID meeters  -> ./init.sh 10  
 > Please use excact amount of meeters. See issuetracker.
 
 In case of any problems run:
