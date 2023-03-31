@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 arch=$(uname -m)
 
 if [ "$arch" = "armv7l" ]; then
