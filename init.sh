@@ -28,10 +28,10 @@ elif [ "$arch" = "x86_64" ]; then
     chmod +x influxdb-init.iql
     chmod +x influxdb.conf
     chmod +x telegraf.conf
-    mv onboarding.sh /edge/admin
-    mv influxdb-init.iql /edge/admin
-    mv influxdb.conf /edge/admin
-    mv telegraf.conf /edge/admin
+    mv onboarding.sh /home/edge
+    mv influxdb-init.iql /home/edge
+    mv influxdb.conf /home/edge
+    mv telegraf.conf /home/edge
     cd /home/edge
 else
     echo "Onboarding status: Error: Can't resolve architecture!" 
