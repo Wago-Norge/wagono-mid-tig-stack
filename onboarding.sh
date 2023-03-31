@@ -1,5 +1,5 @@
 
-# This setup script is experimental.
+
 version="1.0.0"
 
 ### FUNCTIONS ####
@@ -14,21 +14,65 @@ remove_container () {
 run_telegraf () {
     ret="$(change_ip)"
     wait
-    local local_run=$(docker run -d --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
+
+
+    ### TEST ###
+    if [ "$2" = "armv7l" ]; then
+        local local_run=$(docker run -d --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
+    elif [ "$2" = "x86_64" ]; then
+        local local_run=$(docker run -d --restart unless-stopped --name "$1" --device=/dev/ttyUSB0:/dev/serial:rw -v /home/edge/telegraf.conf:/etc/telegraf/telegraf.conf:ro telegraf:latest)
+    else
+        echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+    fi
+    ### TEST ###
+
+    
+    
+    
+    
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
     echo "$local_run"
 }
 
 run_influx () {
-    local local_run=$(docker run -d --name "$1" -p 8086:8086 -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=wago -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE -v influx-vol-data:/var/lib/influxdb -v /home/admin/influxdb.conf:/etc/influxdb/influxdb.conf -v /home/admin/influxdb-init.iql:/docker-entrypoint-initdb.d/influxdb-init.iql arm32v7/influxdb:latest -config /etc/influxdb/influxdb.conf)
+
+
+    
+    
+    ### TEST ###
+    if [ "$2" = "armv7l" ]; then
+        local local_run=$(docker run -d --name "$1" -p 8086:8086 -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=wago -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE -v influx-vol-data:/var/lib/influxdb -v /home/admin/influxdb.conf:/etc/influxdb/influxdb.conf -v /home/admin/influxdb-init.iql:/docker-entrypoint-initdb.d/influxdb-init.iql arm32v7/influxdb:latest -config /etc/influxdb/influxdb.conf)
+    elif [ "$2" = "x86_64" ]; then
+        local local_run=$(docker run -d --restart unless-stopped --name "$1" -p 8086:8086 -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=wago -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE -v influx-vol-data:/var/lib/influxdb -v /home/edge/influxdb.conf:/etc/influxdb/influxdb.conf -v /home/edge/influxdb-init.iql:/docker-entrypoint-initdb.d/influxdb-init.iql influxdb:1.8 -config /etc/influxdb/influxdb.conf)
+    else
+        echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+    fi
+    ### TEST ###
+    
+    
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
     echo "$local_run"
 }
 
 run_grafana () {
-    local local_run=$(docker run -d --name "$1" -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest)
+
+
+    echo "DEBUG: $2" >> midlog.txt
+
+    
+    ### TEST ###
+    if [ "$2" = "armv7l" ]; then
+        local local_run=$(docker run -d --name "$1" -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest)
+    elif [ "$2" = "x86_64" ]; then
+        local local_run=$(docker run -d --restart unless-stopped --name "$1" -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest)
+    else
+        echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+    fi
+    ### TEST ###
+    
+    
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
     echo "$local_run"   
@@ -44,6 +88,7 @@ run_demo () {
 }
 
 # NOT USED
+# NB! Archtecture not implemented
 remove_image () {
     local image="$(check_image "$1")"
     if [ "$image" = "true" ]; then
@@ -74,7 +119,8 @@ remove_image () {
 }
 
 install_image () {
-    docker pull "$1" >> midlog.txt
+    # Do not hide output
+    docker pull "$1" >> midlog.txt 
     wait
     echo "Onboarding status: "$1" pulled" >> midlog.txt
     local_install="$1"
@@ -350,7 +396,7 @@ configure_grafana () {
 
     echo "Onboarding status: Grafana: Creating organization: $org"  >> midlog.txt
 
-    local res=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"'$org'"}' http://$user:$password@$ip:3000/api/orgs)
+    local res=$(curl -X POST -H "Content-Type: application/json" -d '{"name":"'$org'"}' http://$user:$password@$ip:3000/api/orgs) >> midlog.txt
     wait
     echo "Onboarding status: Grafana: result: $res"  >> midlog.txt
 
@@ -418,6 +464,9 @@ wait
 
 echo "Logging to file /home/admin/midlog.txt" > midlog.txt > /dev/stderr
 
+arch=$(uname -m)
+echo "Architecture is $arch" >> midlog.txt 
+
 # Force removal of containers and volumes, keep images.
 if [ "$1" = "--clean" ]; then
     echo "Onboarding status: Forced removal of MID TIG stack" >> midlog.txt > /dev/stderr
@@ -452,16 +501,30 @@ elif [ "$1" = "-help" ] ||  [ "$1" = "-h" ]; then
     echo "      --clean: stop and remove containers and volumes. Keep images."
     echo "  "
 else 
+
+    if [ "$arch" = "armv7l" ]; then
+        chmod ugo+rw /dev/serial
+    elif [ "$arch" = "x86_64" ]; then
+
+
+        # MUST CHECK IF EXCISTS!!! else abort....
+        chmod ugo+rw /dev/ttyUSB0
+    
+    
+    
+    
+    else
+        echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+    fi
+
     if [ "$1" = "1" ]; then
         echo "Onboarding status: Selected amount of mids allready configured in Telegraf.conf" >> midlog.txt
-        chmod ugo+rw /dev/serial
         onboard="$(check_containers "telegraf" "influx" "grafana")" 
     else 
         if  [ "$1" -gt "0" ] && [ "$1" -le "10" ]; then
             # save original
             ret="$(cp telegraf.conf telegraf_copy.conf)"
             wait
-            chmod ugo+rw /dev/serial
             mid_conf=$(mid_conf "$1")
             onboard="$(check_containers "telegraf" "influx" "grafana")"
         else
@@ -469,6 +532,8 @@ else
         fi
     fi
 fi
+
+
 
 
 
@@ -492,9 +557,23 @@ case "$onboard" in
                 # GRAFANA (start Grafana first- issuetracker)
                 image=$(check_image "grafana")
                 if [ "$image" = "false" ]; then
-                    ret="$(install_image "grafana/grafana:latest")"
-                    echo "Onboarding status: Docker image for "$ret" pulled"
-                    ret="$(create_volume "grafana-vol-data")"
+
+
+
+                    ### TEST ###
+                    if [ "$arch" = "armv7l" ]; then
+                        ret="$(install_image "grafana/grafana:latest")"
+                        echo "Onboarding status: Docker image for "$ret" pulled"
+                    elif [ "$arch" = "x86_64" ]; then
+                        ret="$(install_image "grafana/grafana:latest")"
+                        echo "Onboarding status: Docker image for "$ret" pulled"
+                    else
+                        echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+                    fi
+                    ### TEST ###
+
+
+
                 else
                     return_container_stat="$(inspect "grafana")"
 
@@ -513,9 +592,17 @@ case "$onboard" in
 
                 ret="$(create_volume "grafana-vol-data")"
 
-                ret="$(run_grafana "grafana")"
-                echo "Onboarding status: Grafana container started"   
 
+
+                    
+                ### TEST ###
+                ret="$(run_grafana "grafana" "$arch")"
+                ### TEST ###
+
+
+
+                echo "Onboarding status: Grafana container started"   
+                
                 ip_addr=$(ip route get 8.8.8.8 | awk '{ print $7; exit }')
                 ret="$(configure_grafana "$ip_addr" "admin" "admin" "wago")"
 
@@ -526,9 +613,22 @@ case "$onboard" in
                     # Install image
                     image=$(check_image "influx")
                     if [ "$image" = "false" ]; then
-                        ret="$(install_image "arm32v7/influxdb:latest")"
-                        echo "Onboarding status: Docker image for "$ret" pulled"
-                        ret="$(create_volume "influx-vol-data")"
+
+
+
+                        ### TEST ###
+                        if [ "$arch" = "armv7l" ]; then
+                            ret="$(install_image "arm32v7/influxdb:latest")"
+                            echo "Onboarding status: Docker image for "$ret" pulled"
+                        elif [ "$arch" = "x86_64" ]; then
+                            ret="$(install_image "influxdb:1.8")"
+                            echo "Onboarding status: Docker image for "$ret" pulled"
+                        else
+                            echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+                        fi
+                         ### TEST ###
+               
+                        
                     else
                         return_container_stat="$(inspect "influx")"
                         # If running, stop it
@@ -547,16 +647,44 @@ case "$onboard" in
                     fi
                     
                     ret="$(create_volume "influx-vol-data")"
+
                     # Run container 
-                    ret="$(run_influx "influx")"
+
+
+                    ### TEST ###                    
+                    ret="$(run_influx "influx" "$arch")"
+                    ### TEST ###
+
+
+
                     echo "Onboarding status: Influx container started"   
+
 
 
                     # TELEGRAF
                     image=$(check_image "telegraf")
                     if [ "$image" = "false" ]; then
-                        ret="$(install_image "arm32v7/telegraf:latest")"
-                        echo "Onboarding status: Docker image for "$ret" pulled"
+
+
+
+
+                        ### TEST ###
+                        if [ "$arch" = "armv7l" ]; then
+                            ret="$(install_image "telegraf:latest")"
+                            echo "Onboarding status: Docker image for "$ret" pulled"
+                        elif [ "$arch" = "x86_64" ]; then
+                            ret="$(install_image "telegraf:latest")"
+                            echo "Onboarding status: Docker image for "$ret" pulled"
+                        else
+                            echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
+                        fi
+                         ### TEST ###                    
+                        
+                    
+                    
+                    
+                    
+                    
                     else
                         return_container_stat="$(inspect "telegraf")"
 
@@ -572,10 +700,16 @@ case "$onboard" in
                             echo "Onboarding status: "$ret" container removed"
                         fi
                     fi
-                    ret="$(run_telegraf "telegraf")"
+
+
+                    ### TEST ###
+                    ret="$(run_telegraf "telegraf" "$arch")"
+                    ### TEST ###
+
+
                     echo "Onboarding status: Telegraf container started"    
                 fi     
-
+                
                 exit;;
 
             # No - exit the case
