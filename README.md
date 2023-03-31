@@ -1,8 +1,41 @@
+---
+description: Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
+---
+
 # README
 
-Wago Energy Meters (MID 879-30xx) with TIG-stack (Telegraf+Influx+Grafana).
-
 <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+## Supported Devices
+
+* PFC200
+* CC100
+* TP-panels and Edge Controller
+* Edge PC
+
+## Prepare the controller (omitted for Edge PC)
+
+In WBM:
+
+1. Set PLC Runtime to 'none'.
+2. Enable 'IP Forwarding through multiple interfaces'.
+3. Enable Docker.
+4. Enable and set a NTP time server.
+5. Format a memory card as 'ext4' with label 'Docker'.
+
+Extend the docker data directory from internal flash to memory card. Change to “data-root”:“/media/docker”:
+
+```
+nano /etc/docker/daemon.json 
+```
+
+Permit docker to access serial port:
+
+```
+sudo chmod ugo+rw /dev/serial
+```
+
+Reboot the controller.
 
 ## 879-30xx Setup
 
@@ -20,6 +53,8 @@ Meter is using RS-485: Modbus® address 001 • Baud rate 9600 • 8 data bits �
 CC100: D+ -> A, D- > B/-
 
 PFC200: Pin 3 -> B/-, Pin 8 -> A
+
+Edge PC: Please check manual for the USB-to-Serial converter used.
 
 ## Automated setup
 
@@ -49,7 +84,7 @@ Run the installation script and pass the amount of MIDs to be configured:
 ./init.sh <x>
 ```
 
-> x is restricted to maximum 10 MID meeters  -> ./init.sh 10  
+> x is restricted to maximum 10 MID meeters -> ./init.sh 10\
 > Please use excact amount of meeters. See issuetracker.
 
 In case of any problems run:
@@ -61,30 +96,6 @@ In case of any problems run:
 Configure Influxdb in Grafana as described below in the "manual setup".
 
 ## Manual setup
-
-### Prepare the controller
-
-In WBM:
-
-1. Set PLC Runtime to 'none'.
-2. Enable 'IP Forwarding through multiple interfaces'.
-3. Enable Docker.
-4. Enable and set a NTP time server.
-5. Format a memory card as 'ext4' with label 'Docker'.
-
-Extend the docker data directory from internal flash to memory card. Change to “data-root”:“/media/docker”:
-
-```
-nano /etc/docker/daemon.json 
-```
-
-Permit docker to access serial port:
-
-```
-sudo chmod ugo+rw /dev/serial
-```
-
-Reboot the controller.
 
 ### Setup Telegraf
 
