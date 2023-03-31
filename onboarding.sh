@@ -15,8 +15,6 @@ run_telegraf () {
     ret="$(change_ip)"
     wait
 
-
-    ### TEST ###
     if [ "$2" = "armv7l" ]; then
         local local_run=$(docker run -d --name "$1" --device=/dev/serial:/dev/serial:rw -v /home/admin/telegraf.conf:/etc/telegraf/telegraf.conf:ro arm32v7/telegraf:latest)
     elif [ "$2" = "x86_64" ]; then
@@ -24,11 +22,6 @@ run_telegraf () {
     else
         echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
     fi
-    ### TEST ###
-
-    
-    
-    
     
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
@@ -37,10 +30,6 @@ run_telegraf () {
 
 run_influx () {
 
-
-    
-    
-    ### TEST ###
     if [ "$2" = "armv7l" ]; then
         local local_run=$(docker run -d --name "$1" -p 8086:8086 -e INFLUXDB_ADMIN_USER=admin -e INFLUXDB_ADMIN_PASSWORD=wago -e INFLUXDB_MONITOR_STORE_ENABLED=FALSE -v influx-vol-data:/var/lib/influxdb -v /home/admin/influxdb.conf:/etc/influxdb/influxdb.conf -v /home/admin/influxdb-init.iql:/docker-entrypoint-initdb.d/influxdb-init.iql arm32v7/influxdb:latest -config /etc/influxdb/influxdb.conf)
     elif [ "$2" = "x86_64" ]; then
@@ -48,8 +37,6 @@ run_influx () {
     else
         echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
     fi
-    ### TEST ###
-    
     
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
@@ -61,8 +48,6 @@ run_grafana () {
 
     echo "DEBUG: $2" >> midlog.txt
 
-    
-    ### TEST ###
     if [ "$2" = "armv7l" ]; then
         local local_run=$(docker run -d --name "$1" -p 3000:3000 -v grafana-vol-data:/var/lib/grafana grafana/grafana:latest)
     elif [ "$2" = "x86_64" ]; then
@@ -70,8 +55,6 @@ run_grafana () {
     else
         echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
     fi
-    ### TEST ###
-    
     
     wait
     echo "Onboarding status: "$1" container started" >> midlog.txt
@@ -455,9 +438,6 @@ configure_grafana () {
 
 
 
-# Remaining: 
-# add edge pc
-
 # save original
 ret="$(cp telegraf.conf telegraf_copy.conf)"
 wait
@@ -506,13 +486,14 @@ else
         chmod ugo+rw /dev/serial
     elif [ "$arch" = "x86_64" ]; then
 
-
-        # MUST CHECK IF EXCISTS!!! else abort....
-        chmod ugo+rw /dev/ttyUSB0
-    
-    
-    
-    
+        usb0=$(ls "/dev/ttyUSB0")
+        if [ "$usb0" = "/dev/ttyUSB0" ]; then
+            echo "Onboarding status: /dev/ttyUSB0 found" >> midlog.txt
+            chmod ugo+rw /dev/ttyUSB0
+        else
+            echo "Onboarding status: Error: /dev/ttyUSB0 not found" >> midlog.txt > /dev/stderr
+        fi
+      
     else
         echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
     fi
@@ -558,9 +539,6 @@ case "$onboard" in
                 image=$(check_image "grafana")
                 if [ "$image" = "false" ]; then
 
-
-
-                    ### TEST ###
                     if [ "$arch" = "armv7l" ]; then
                         ret="$(install_image "grafana/grafana:latest")"
                         echo "Onboarding status: Docker image for "$ret" pulled"
@@ -570,9 +548,6 @@ case "$onboard" in
                     else
                         echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
                     fi
-                    ### TEST ###
-
-
 
                 else
                     return_container_stat="$(inspect "grafana")"
@@ -591,15 +566,7 @@ case "$onboard" in
                 fi
 
                 ret="$(create_volume "grafana-vol-data")"
-
-
-
-                    
-                ### TEST ###
                 ret="$(run_grafana "grafana" "$arch")"
-                ### TEST ###
-
-
 
                 echo "Onboarding status: Grafana container started"   
                 
@@ -614,9 +581,6 @@ case "$onboard" in
                     image=$(check_image "influx")
                     if [ "$image" = "false" ]; then
 
-
-
-                        ### TEST ###
                         if [ "$arch" = "armv7l" ]; then
                             ret="$(install_image "arm32v7/influxdb:latest")"
                             echo "Onboarding status: Docker image for "$ret" pulled"
@@ -626,8 +590,6 @@ case "$onboard" in
                         else
                             echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
                         fi
-                         ### TEST ###
-               
                         
                     else
                         return_container_stat="$(inspect "influx")"
@@ -650,25 +612,15 @@ case "$onboard" in
 
                     # Run container 
 
-
-                    ### TEST ###                    
                     ret="$(run_influx "influx" "$arch")"
-                    ### TEST ###
-
-
 
                     echo "Onboarding status: Influx container started"   
-
 
 
                     # TELEGRAF
                     image=$(check_image "telegraf")
                     if [ "$image" = "false" ]; then
 
-
-
-
-                        ### TEST ###
                         if [ "$arch" = "armv7l" ]; then
                             ret="$(install_image "telegraf:latest")"
                             echo "Onboarding status: Docker image for "$ret" pulled"
@@ -678,12 +630,6 @@ case "$onboard" in
                         else
                             echo "Onboarding status: Error: Can't resolve architecture!" >> midlog.txt > /dev/stderr
                         fi
-                         ### TEST ###                    
-                        
-                    
-                    
-                    
-                    
                     
                     else
                         return_container_stat="$(inspect "telegraf")"
@@ -701,11 +647,7 @@ case "$onboard" in
                         fi
                     fi
 
-
-                    ### TEST ###
                     ret="$(run_telegraf "telegraf" "$arch")"
-                    ### TEST ###
-
 
                     echo "Onboarding status: Telegraf container started"    
                 fi     
