@@ -29,12 +29,6 @@ Extend the docker data directory from internal flash to memory card. Change to â
 nano /etc/docker/daemon.json 
 ```
 
-Permit docker to access serial port:
-
-```
-sudo chmod ugo+rw /dev/serial
-```
-
 Reboot the controller.
 
 ## 879-30xx Setup
@@ -95,7 +89,13 @@ In case of any problems run:
 
 Configure Influxdb in Grafana as described below in the "manual setup".
 
-## Manual setup
+## Manual setup  
+
+Permit docker to access serial port:
+
+```
+sudo chmod ugo+rw /dev/serial
+```
 
 ### Setup Telegraf
 
