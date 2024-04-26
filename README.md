@@ -21,7 +21,7 @@ In WBM:
 2. Enable 'IP Forwarding through multiple interfaces'.
 3. Enable Docker.
 4. Enable and set a NTP time server.
-5. Format a memory card as 'ext4' with label 'Docker'.
+5. Format a memory card as 'ext4' with label 'docker'.
 
 Extend the docker data directory from internal flash to memory card. Change to “data-root”:“/media/docker”:
 
